@@ -1,0 +1,69 @@
+<%- include('partials/header') %>
+<div class="container mt-4">
+  <h2>Search Results</h2>
+  <div class="row">
+    <% if (!books || books.length === 0) { %>
+      <div class="col-12">
+        <div class="alert alert-info">No books found. Try a different search term.</div>
+      </div>
+    <% } else { %>
+      <% books.forEach(book => {
+        const info = book.volumeInfo;
+      %>
+        <div class="col-md-4 mb-4">
+          <div class="card h-100">
+            <img src="<%= info.imageLinks?.thumbnail || '/placeholder.jpg' %>" class="card-img-top" alt="Book cover">
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title"><%= info.title %></h5>
+              <p class="card-text">By <%= info.authors?.join(', ') || 'Unknown Author' %></p>
+              <% if (info.description) { %>
+                <p class="card-text description" id="description-<%= book.id %>">
+                  <span class="short-description">
+                    <%= info.description.length > 100 ? info.description.substring(0, 100) + '...' : info.description %>
+                  </span>
+                  <span class="full-description" style="display: none;">
+                    <%= info.description %>
+                  </span>
+                  <% if (info.description.length > 100) { %>
+                    <a href="javascript:void(0);" class="read-more" onclick="toggleDescription('<%= book.id %>')">Read More</a>
+                  <% } %>
+                </p>
+              <% } %>
+              <form action="/books/add" method="POST" class="mt-auto">
+                <input type="hidden" name="googleId" value="<%= book.id %>">
+                <input type="hidden" name="title" value="<%= info.title %>">
+                <input type="hidden" name="authors" value="<%= info.authors?.join(', ') || 'Unknown' %>">
+                <input type="hidden" name="thumbnail" value="<%= info.imageLinks?.thumbnail || '' %>">
+                <button type="submit" class="btn btn-primary">Add to My Shelf</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+ 
+  <div class="mt-4">
+    <a href="/" class="btn btn-secondary">Back to Bookshelf</a>
+  </div>
+</div>
+
+<script>
+  function toggleDescription(bookId) {
+    const shortDesc = document.querySelector(`#description-${bookId} .short-description`);
+    const fullDesc = document.querySelector(`#description-${bookId} .full-description`);
+    const link = document.querySelector(`#description-${bookId} .read-more`);
+    
+    if (fullDesc.style.display === 'none') {
+      fullDesc.style.display = 'inline';
+      shortDesc.style.display = 'none';
+      link.textContent = 'Read Less';
+    } else {
+      fullDesc.style.display = 'none';
+      shortDesc.style.display = 'inline';
+      link.textContent = 'Read More';
+    }
+  }
+</script>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,69 @@
+<%- include('partials/header') %>
+<div class="container mt-4">
+  <h2><%= status %> Books</h2>
+  <% if (books.length === 0) { %>
+    <div class="alert alert-info">
+      <p>No books marked as <%= status %> yet.</p>
+    </div>
+  <% } else { %>
+    <div class="row">
+      <% books.forEach(book => { %>
+        <div class="col-md-4 mb-4" id="book-<%= book._id %>">
+          <div class="card h-100">
+            <img src="<%= book.thumbnail || '/placeholder.jpg' %>" class="card-img-top" alt="<%= book.title %>">
+            <div class="card-body">
+              <h5 class="card-title"><%= book.title %></h5>
+              <p class="card-text">By <%= book.authors.join(', ') %></p>
+             
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="status-display">
+                  <span class="status-badge <%= book.status === 'Unread' ? 'status-unread' : (book.status === 'In Progress' ? 'status-progress' : 'status-read') %>">
+                    <%= book.status %>
+                  </span>
+                </span>
+              </div>
+             
+              <form action="/update-status/<%= book._id %>" method="POST" class="update-status-form mb-3">
+                <div class="input-group">
+                  <select name="status" class="form-select form-select-sm">
+                    <option value="Unread" <%= book.status === 'Unread' ? 'selected' : '' %>>Unread</option>
+                    <option value="In Progress" <%= book.status === 'In Progress' ? 'selected' : '' %>>In Progress</option>
+                    <option value="Read" <%= book.status === 'Read' ? 'selected' : '' %>>Read</option>
+                  </select>
+                  <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                </div>
+              </form>
+             
+              <!-- Delete button with form -->
+              <form action="/books/delete/<%= book._id %>" method="POST" class="delete-book-form">
+                <button type="button" class="btn btn-sm btn-danger delete-book-btn"
+                        data-book-id="<%= book._id %>"
+                        data-book-title="<%= book.title %>">
+                  Remove Book
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+ 
+  <div class="mt-4">
+    <a href="/" class="btn btn-secondary">Back to Bookshelf</a>
+  </div>
+</div>
+
+<!-- Add this debug script to troubleshoot status updates -->
+<script>
+  // This will help debug any issues with status updates
+  $(document).ready(function() {
+    console.log('Status page loaded. Adding event listeners...');
+   
+    $(document).on('submit', '.update-status-form', function() {
+      console.log('Status form submitted');
+    });
+  });
+</script>
+
+<%- include('partials/footer') %>

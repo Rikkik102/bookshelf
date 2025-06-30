@@ -1,0 +1,107 @@
+<%- include('partials/header') %>
+
+<div class="container mt-4">
+  <!-- Welcome banner - SINGLE WELCOME MESSAGE -->
+  <div class="welcome-banner">
+    <h1>Welcome to Your Bookshelf, <%= user.username %>!</h1>
+    <p>Search and organize your favorite books.</p>
+  </div>
+
+  <!-- Search form -->
+  <div class="search-container">
+    <form action="/search" method="GET" class="mb-4">
+      <div class="input-group">
+        <input type="text" name="q" class="form-control" placeholder="Search books by title or author" required>
+        <button class="btn btn-primary" type="submit">Search</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Books display -->
+  <h3>Your Books</h3>
+  <% if (books.length === 0) { %>
+    <div class="alert alert-info">
+      <p>You haven't added any books yet. Try searching for books above!</p>
+    </div>
+  <% } else { %>
+    <div class="row">
+      <% books.forEach(book => { %>
+        <div class="col-md-4 mb-4" id="book-<%= book._id %>">
+          <div class="card">
+            <% if (book.thumbnail) { %>
+              <img src="<%= book.thumbnail %>" class="card-img-top" alt="Book Cover">
+            <% } else { %>
+              <img src="/placeholder.jpg" class="card-img-top" alt="Book Cover">
+            <% } %>
+            <div class="card-body">
+              <h5 class="card-title"><%= book.title %></h5>
+              <p class="card-text">By <%= book.authors.join(', ') %></p>
+             
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="status-display">
+                  <span class="status-badge <%= book.status === 'Unread' ? 'status-unread' : (book.status === 'In Progress' ? 'status-progress' : 'status-read') %>">
+                    <%= book.status %>
+                  </span>
+                </span>
+              </div>
+             
+              <form action="/update-status/<%= book._id %>" method="POST" class="update-status-form mb-3">
+                <div class="input-group">
+                  <select name="status" class="form-select form-select-sm">
+                    <option value="Unread" <%= book.status === 'Unread' ? 'selected' : '' %>>Unread</option>
+                    <option value="In Progress" <%= book.status === 'In Progress' ? 'selected' : '' %>>In Progress</option>
+                    <option value="Read" <%= book.status === 'Read' ? 'selected' : '' %>>Read</option>
+                  </select>
+                  <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                </div>
+              </form>
+             
+              <!-- Updated delete button with form -->
+              <form action="/books/delete/<%= book._id %>" method="POST" class="delete-book-form">
+                <button type="button" class="btn btn-sm btn-danger delete-book-btn"
+                        data-book-id="<%= book._id %>"
+                        data-book-title="<%= book.title %>">
+                  Remove Book
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+ 
+  <!-- Book carousel for featured books, only show if there are books -->
+  <% if (books.length > 0) { %>
+    <div class="mt-5">
+      <h3>Featured Books</h3>
+      <div id="bookCarousel" class="carousel slide book-carousel" data-bs-ride="carousel">
+        <div class="carousel-inner">
+          <% books.forEach((book, index) => { %>
+            <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+              <div class="d-flex justify-content-center">
+                <div class="card" style="width: 18rem;">
+                  <img src="<%= book.thumbnail || '/placeholder.jpg' %>" class="card-img-top" alt="<%= book.title %>">
+                  <div class="card-body text-center">
+                    <h5 class="card-title"><%= book.title %></h5>
+                    <p class="card-text">By <%= book.authors.join(', ') %></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#bookCarousel" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#bookCarousel" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
+    </div>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>
